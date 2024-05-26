@@ -1,0 +1,16 @@
+# ninja log v5
+35	1686	738462588	samples/CMakeFiles/main.dir/main.cpp.obj	c800ac9fec858977
+15	1896	738462588	src/CMakeFiles/texts.dir/TTextLink.cpp.obj	c59903481a2652d
+4	2090	738462588	src/CMakeFiles/texts.dir/TText.cpp.obj	985755242091ae86
+24	2168	738462588	src/CMakeFiles/texts.dir/TTextViewer.cpp.obj	7b75e8b2e9ab40c
+2169	2768	738462589	lib/texts.lib	9ea6cc8cb8a50d82
+65	2821	738462589	test/CMakeFiles/test_texts.dir/test_main.cpp.obj	5d6938207b7b72b
+85	3088	738462589	test/CMakeFiles/test_texts.dir/TText_test.cpp.obj	1e563fc9a8c2f2f9
+54	3264	738462590	test/CMakeFiles/test_texts.dir/TTextLink_test.cpp.obj	fb74169504d84280
+2768	4328	738462591	bin/main.exe	2753ec8e5ecb1c76
+45	5469	738462592	gtest/CMakeFiles/gtest.dir/gtest-all.cc.obj	298c9ee2e245259f
+5481	5759	738462592	lib/gtest.lib	3ec025ad986b4c00
+5760	6803	738462593	bin/test_texts.exe	f015be9dc441e297
+1	779	738462692	src/CMakeFiles/texts.dir/TTextViewer.cpp.obj	7b75e8b2e9ab40c
+781	941	738462692	lib/texts.lib	9ea6cc8cb8a50d82
+941	1380	738462692	bin/main.exe	2753ec8e5ecb1c76
