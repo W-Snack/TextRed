@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     
     private int xDelta;
     private int yDelta;
+    private boolean isInDropZone = false; // Флаг, указывающий, находится ли текст в серой зоне
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
         draggableText = findViewById(R.id.draggableText);
         dropZone = findViewById(R.id.dropZone);
-        rootLayout = findViewById(R.id.root); // Добавьте android:id="@+id/root" в RelativeLayout, если будет ошибка
+        rootLayout = findViewById(android.R.id.content); // Используем корневой контейнер
 
         draggableText.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -65,25 +66,35 @@ public class MainActivity extends AppCompatActivity {
 
                 switch (event.getAction() & MotionEvent.ACTION_MASK) {
                     case MotionEvent.ACTION_DOWN:
-                        RelativeLayout.LayoutParams lParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
-                        xDelta = x - lParams.leftMargin;
-                        yDelta = y - lParams.topMargin;
+                        if (!isInDropZone) {
+                            RelativeLayout.LayoutParams lParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
+                            xDelta = x - lParams.leftMargin;
+                            yDelta = y - lParams.topMargin;
+                        }
                         break;
+
                     case MotionEvent.ACTION_MOVE:
-                        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
-                        layoutParams.leftMargin = x - xDelta;
-                        layoutParams.topMargin = y - yDelta;
-                        view.setLayoutParams(layoutParams);
+                        if (!isInDropZone) {
+                            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
+                            layoutParams.leftMargin = x - xDelta;
+                            layoutParams.topMargin = y - yDelta;
+                            view.setLayoutParams(layoutParams);
+                        }
                         break;
+
                     case MotionEvent.ACTION_UP:
-                        // Проверяем, находится ли текст в зоне dropZone
-                        if (isViewInBounds(dropZone, (int)event.getRawX(), (int)event.getRawY())) {
-                            // Закрепляем текст в серой зоне
+                        if (!isInDropZone && isViewInBounds(dropZone, x, y)) {
+                            // Удаляем из текущего родителя
+                            ((RelativeLayout) draggableText.getParent()).removeView(draggableText);
+                            
+                            // Добавляем в dropZone
                             FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
                                     FrameLayout.LayoutParams.WRAP_CONTENT,
                                     FrameLayout.LayoutParams.WRAP_CONTENT);
                             draggableText.setLayoutParams(params);
                             dropZone.addView(draggableText);
+                            
+                            isInDropZone = true;
                         }
                         break;
                 }
@@ -93,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // Проверяем, находится ли точка (x, y) внутри View
     private boolean isViewInBounds(View view, int x, int y) {
         int[] location = new int[2];
         view.getLocationOnScreen(location);
