@@ -1,9 +1,105 @@
-*User
- Tis so much joy! 
- If I should fail, 
- And yet, as poor as I,
- Have ventured all
- Have gained! Yes! 
- This side the 
-wheresmymind
- hello
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <!-- Серый контейнер для закрепления -->
+    <FrameLayout
+        android:id="@+id/dropZone"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_centerInParent="true"
+        android:background="#CCCCCC"
+        android:padding="10dp">
+
+        <!-- Здесь будет появляться надпись при закреплении -->
+    </FrameLayout>
+
+    <!-- Перетаскиваемая надпись -->
+    <TextView
+        android:id="@+id/draggableText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Нажми меня"
+        android:textSize="24sp"
+        android:padding="10dp"
+        android:background="#4CAF50"
+        android:textColor="#FFFFFF"/>
+
+</RelativeLayout>
+package com.example.draganddropdemo;
+
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+public class MainActivity extends AppCompatActivity {
+
+    private TextView draggableText;
+    private FrameLayout dropZone;
+    private RelativeLayout rootLayout;
+    
+    private int xDelta;
+    private int yDelta;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        draggableText = findViewById(R.id.draggableText);
+        dropZone = findViewById(R.id.dropZone);
+        rootLayout = findViewById(R.id.root); // Добавьте android:id="@+id/root" в RelativeLayout, если будет ошибка
+
+        draggableText.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+                final int x = (int) event.getRawX();
+                final int y = (int) event.getRawY();
+
+                switch (event.getAction() & MotionEvent.ACTION_MASK) {
+                    case MotionEvent.ACTION_DOWN:
+                        RelativeLayout.LayoutParams lParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
+                        xDelta = x - lParams.leftMargin;
+                        yDelta = y - lParams.topMargin;
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
+                        layoutParams.leftMargin = x - xDelta;
+                        layoutParams.topMargin = y - yDelta;
+                        view.setLayoutParams(layoutParams);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        // Проверяем, находится ли текст в зоне dropZone
+                        if (isViewInBounds(dropZone, (int)event.getRawX(), (int)event.getRawY())) {
+                            // Закрепляем текст в серой зоне
+                            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                                    FrameLayout.LayoutParams.WRAP_CONTENT);
+                            draggableText.setLayoutParams(params);
+                            dropZone.addView(draggableText);
+                        }
+                        break;
+                }
+                rootLayout.invalidate();
+                return true;
+            }
+        });
+    }
+
+    private boolean isViewInBounds(View view, int x, int y) {
+        int[] location = new int[2];
+        view.getLocationOnScreen(location);
+        int viewX = location[0];
+        int viewY = location[1];
+
+        return (x > viewX && x < (viewX + view.getWidth())) &&
+                (y > viewY && y < (viewY + view.getHeight()));
+    }
+}
