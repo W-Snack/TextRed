@@ -1,91 +1,52 @@
-import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/colorName"
+    android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:layout_margin="8dp"
+    android:gravity="center"
+    android:textSize="20sp"
+    android:padding="16dp"
+    android:elevation="4dp"/>
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.recyclerview.widget.RecyclerView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/recyclerView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="8dp"/>
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import android.graphics.Color;
+import android.os.Bundle;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private EditText editText;
-    private CheckBox checkBox;
-    private Button saveButton;
-    private SharedPreferences sharedPreferences;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Инициализация SharedPreferences
-        sharedPreferences = getSharedPreferences("AppPreferences", MODE_PRIVATE);
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // Находим элементы интерфейса
-        editText = findViewById(R.id.editText);
-        checkBox = findViewById(R.id.checkBox);
-        saveButton = findViewById(R.id.saveButton);
+        List<ColorItem> colorItems = new ArrayList<>();
+        // Добавляем элементы с разными цветами
+        colorItems.add(new ColorItem(Color.RED, Color.WHITE, "Красный"));
+        colorItems.add(new ColorItem(Color.BLUE, Color.WHITE, "Синий"));
+        colorItems.add(new ColorItem(Color.GREEN, Color.BLACK, "Зеленый"));
+        colorItems.add(new ColorItem(Color.YELLOW, Color.BLACK, "Желтый"));
+        colorItems.add(new ColorItem(Color.MAGENTA, Color.WHITE, "Пурпурный"));
+        colorItems.add(new ColorItem(Color.CYAN, Color.BLACK, "Голубой"));
+        colorItems.add(new ColorItem(Color.GRAY, Color.WHITE, "Серый"));
+        colorItems.add(new ColorItem(Color.DKGRAY, Color.WHITE, "Темно-серый"));
+        colorItems.add(new ColorItem(Color.parseColor("#FFA500"), Color.BLACK, "Оранжевый")); // Оранжевый
+        colorItems.add(new ColorItem(Color.parseColor("#800080"), Color.WHITE, "Фиолетовый")); // Фиолетовый
 
-        // Загружаем сохранённые значения
-        loadSavedValues();
-
-        // Обработчик нажатия кнопки сохранения
-        saveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                saveValues();
-            }
-        });
-    }
-
-    private void loadSavedValues() {
-        // Загружаем сохранённый текст (по умолчанию пустая строка)
-        String savedText = sharedPreferences.getString("saved_text", "");
-        editText.setText(savedText);
-
-        // Загружаем состояние флажка (по умолчанию false)
-        boolean isChecked = sharedPreferences.getBoolean("saved_checkbox", false);
-        checkBox.setChecked(isChecked);
-    }
-
-    private void saveValues() {
-        // Сохраняем текст из EditText
-        String textToSave = editText.getText().toString();
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("saved_text", textToSave);
-
-        // Сохраняем состояние CheckBox
-        boolean isChecked = checkBox.isChecked();
-        editor.putBoolean("saved_checkbox", isChecked);
-        editor.apply(); // или commit() для синхронного сохранения
+        ColorAdapter adapter = new ColorAdapter(colorItems);
+        recyclerView.setAdapter(adapter);
     }
 }
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    tools:context=".MainActivity">
-
-    <EditText
-        android:id="@+id/editText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Введите текст" />
-
-    <CheckBox
-        android:id="@+id/checkBox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Включить опцию" />
-
-    <Button
-        android:id="@+id/saveButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="Сохранить" />
-
-</LinearLayout>
