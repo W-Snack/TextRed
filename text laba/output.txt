@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root"  <!-- Добавьте этот ID! -->
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
@@ -12,10 +14,7 @@
         android:layout_height="200dp"
         android:layout_centerInParent="true"
         android:background="#CCCCCC"
-        android:padding="10dp">
-
-        <!-- Здесь будет появляться надпись при закреплении -->
-    </FrameLayout>
+        android:padding="10dp" />
 
     <!-- Перетаскиваемая надпись -->
     <TextView
@@ -26,9 +25,10 @@
         android:textSize="24sp"
         android:padding="10dp"
         android:background="#4CAF50"
-        android:textColor="#FFFFFF"/>
+        android:textColor="#FFFFFF" />
 
 </RelativeLayout>
+
 package com.example.draganddropdemo;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     
     private int xDelta;
     private int yDelta;
-    private boolean isInDropZone = false; // Флаг, указывающий, находится ли текст в серой зоне
+    private boolean isInDropZone = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
         draggableText = findViewById(R.id.draggableText);
         dropZone = findViewById(R.id.dropZone);
-        rootLayout = findViewById(android.R.id.content); // Используем корневой контейнер
+        rootLayout = findViewById(R.id.root);  // Теперь rootLayout берётся правильно
 
         draggableText.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -98,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                         break;
                 }
-                rootLayout.invalidate();
                 return true;
             }
         });
