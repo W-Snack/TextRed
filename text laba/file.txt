@@ -6,3 +6,87 @@ Have ventured all
 Have gained! Yes! 
 This side the 
 }
+import android.os.Bundle
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.EditText
+import androidx.appcompat.app.AppCompatActivity
+
+class MainActivity : AppCompatActivity() {
+    private lateinit var editText: EditText
+    private lateinit var checkBox: CheckBox
+    private lateinit var saveButton: Button
+    private lateinit var sharedPreferences: SharedPreferences
+    
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+        
+        // Инициализация SharedPreferences
+        sharedPreferences = getSharedPreferences("AppPreferences", MODE_PRIVATE)
+        
+        // Находим элементы интерфейса
+        editText = findViewById(R.id.editText)
+        checkBox = findViewById(R.id.checkBox)
+        saveButton = findViewById(R.id.saveButton)
+        
+        // Загружаем сохраненные значения
+        loadSavedValues()
+        
+        // Обработчик нажатия кнопки сохранения
+        saveButton.setOnClickListener {
+            saveValues()
+        }
+    }
+    
+    private fun loadSavedValues() {
+        // Загружаем сохраненный текст (по умолчанию пустая строка)
+        val savedText = sharedPreferences.getString("saved_text", "")
+        editText.setText(savedText)
+        
+        // Загружаем состояние флажка (по умолчанию false)
+        val isChecked = sharedPreferences.getBoolean("saved_checkbox", false)
+        checkBox.isChecked = isChecked
+    }
+    
+    private fun saveValues() {
+        // Сохраняем текст из EditText
+        val textToSave = editText.text.toString()
+        sharedPreferences.edit().putString("saved_text", textToSave).apply()
+        
+        // Сохраняем состояние CheckBox
+        val isChecked = checkBox.isChecked
+        sharedPreferences.edit().putBoolean("saved_checkbox", isChecked).apply()
+    }
+}
+
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".MainActivity">
+
+    <EditText
+        android:id="@+id/editText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Введите текст" />
+
+    <CheckBox
+        android:id="@+id/checkBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Включить опцию" />
+
+    <Button
+        android:id="@+id/saveButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Сохранить" />
+
+</LinearLayout>
