@@ -1,116 +1,173 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout 
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/root"  <!-- Добавьте этот ID! -->
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    android:orientation="vertical"
+    android:padding="16dp">
 
-    <!-- Серый контейнер для закрепления -->
-    <FrameLayout
-        android:id="@+id/dropZone"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_centerInParent="true"
-        android:background="#CCCCCC"
-        android:padding="10dp" />
-
-    <!-- Перетаскиваемая надпись -->
-    <TextView
-        android:id="@+id/draggableText"
-        android:layout_width="wrap_content"
+    <EditText
+        android:id="@+id/num1"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Нажми меня"
-        android:textSize="24sp"
-        android:padding="10dp"
-        android:background="#4CAF50"
-        android:textColor="#FFFFFF" />
+        android:hint="Enter number 1"
+        android:inputType="numberDecimal"/>
 
-</RelativeLayout>
+    <EditText
+        android:id="@+id/num2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter number 2"
+        android:inputType="numberDecimal"/>
 
-package com.example.draganddropdemo;
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
-import androidx.appcompat.app.AppCompatActivity;
-import android.os.Bundle;
-import android.view.MotionEvent;
-import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+        <Button
+            android:id="@+id/addBtn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="+"/>
+
+        <Button
+            android:id="@+id/subBtn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="-"/>
+
+        <Button
+            android:id="@+id/mulBtn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="*"/>
+
+        <Button
+            android:id="@+id/divBtn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="/"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/result"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:padding="16dp"/>
+
+</LinearLayout>
 
 public class MainActivity extends AppCompatActivity {
+    static {
+        System.loadLibrary("native-lib");
+    }
 
-    private TextView draggableText;
-    private FrameLayout dropZone;
-    private RelativeLayout rootLayout;
-    
-    private int xDelta;
-    private int yDelta;
-    private boolean isInDropZone = false;
+    private EditText num1, num2;
+    private TextView resultView;
+
+    public native double nativeAdd(double a, double b);
+    public native double nativeSub(double a, double b);
+    public native double nativeMul(double a, double b);
+    public native double nativeDiv(double a, double b);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        draggableText = findViewById(R.id.draggableText);
-        dropZone = findViewById(R.id.dropZone);
-        rootLayout = findViewById(R.id.root);  // Теперь rootLayout берётся правильно
+        num1 = findViewById(R.id.num1);
+        num2 = findViewById(R.id.num2);
+        resultView = findViewById(R.id.result);
 
-        draggableText.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent event) {
-                final int x = (int) event.getRawX();
-                final int y = (int) event.getRawY();
+        setupButton(R.id.addBtn, "add");
+        setupButton(R.id.subBtn, "sub");
+        setupButton(R.id.mulBtn, "mul");
+        setupButton(R.id.divBtn, "div");
+    }
 
-                switch (event.getAction() & MotionEvent.ACTION_MASK) {
-                    case MotionEvent.ACTION_DOWN:
-                        if (!isInDropZone) {
-                            RelativeLayout.LayoutParams lParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
-                            xDelta = x - lParams.leftMargin;
-                            yDelta = y - lParams.topMargin;
-                        }
-                        break;
+    private void setupButton(int buttonId, final String operation) {
+        Button button = findViewById(buttonId);
+        button.setOnClickListener(v -> calculate(operation));
+    }
 
-                    case MotionEvent.ACTION_MOVE:
-                        if (!isInDropZone) {
-                            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
-                            layoutParams.leftMargin = x - xDelta;
-                            layoutParams.topMargin = y - yDelta;
-                            view.setLayoutParams(layoutParams);
-                        }
-                        break;
+    private void calculate(String operation) {
+        try {
+            double a = Double.parseDouble(num1.getText().toString());
+            double b = Double.parseDouble(num2.getText().toString());
+            double result = 0;
 
-                    case MotionEvent.ACTION_UP:
-                        if (!isInDropZone && isViewInBounds(dropZone, x, y)) {
-                            // Удаляем из текущего родителя
-                            ((RelativeLayout) draggableText.getParent()).removeView(draggableText);
-                            
-                            // Добавляем в dropZone
-                            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
-                                    FrameLayout.LayoutParams.WRAP_CONTENT,
-                                    FrameLayout.LayoutParams.WRAP_CONTENT);
-                            draggableText.setLayoutParams(params);
-                            dropZone.addView(draggableText);
-                            
-                            isInDropZone = true;
-                        }
-                        break;
-                }
-                return true;
+            switch (operation) {
+                case "add":
+                    result = nativeAdd(a, b);
+                    break;
+                case "sub":
+                    result = nativeSub(a, b);
+                    break;
+                case "mul":
+                    result = nativeMul(a, b);
+                    break;
+                case "div":
+                    if (b == 0) throw new ArithmeticException("Division by zero");
+                    result = nativeDiv(a, b);
+                    break;
             }
-        });
-    }
 
-    // Проверяем, находится ли точка (x, y) внутри View
-    private boolean isViewInBounds(View view, int x, int y) {
-        int[] location = new int[2];
-        view.getLocationOnScreen(location);
-        int viewX = location[0];
-        int viewY = location[1];
-
-        return (x > viewX && x < (viewX + view.getWidth())) &&
-                (y > viewY && y < (viewY + view.getHeight()));
+            resultView.setText(String.format("Result: %.2f", result));
+        } catch (NumberFormatException e) {
+            resultView.setText("Please enter valid numbers");
+        } catch (ArithmeticException e) {
+            resultView.setText(e.getMessage());
+        }
     }
+}
+
+#include <jni.h>
+#include <string>
+
+extern "C" JNIEXPORT jdouble JNICALL
+Java_com_example_myapplication_MainActivity_nativeAdd(
+        JNIEnv* env,
+        jobject /* this */,
+        jdouble a,
+        jdouble b) {
+    return a + b;
+}
+
+extern "C" JNIEXPORT jdouble JNICALL
+Java_com_example_myapplication_MainActivity_nativeSub(
+        JNIEnv* env,
+        jobject /* this */,
+        jdouble a,
+        jdouble b) {
+    return a - b;
+}
+
+extern "C" JNIEXPORT jdouble JNICALL
+Java_com_example_myapplication_MainActivity_nativeMul(
+        JNIEnv* env,
+        jobject /* this */,
+        jdouble a,
+        jdouble b) {
+    return a * b;
+}
+
+extern "C" JNIEXPORT jdouble JNICALL
+Java_com_example_myapplication_MainActivity_nativeDiv(
+        JNIEnv* env,
+        jobject /* this */,
+        jdouble a,
+        jdouble b) {
+    if (b == 0) {
+        jclass exClass = env->FindClass("java/lang/ArithmeticException");
+        env->ThrowNew(exClass, "Division by zero from native code");
+        return 0;
+    }
+    return a / b;
 }
